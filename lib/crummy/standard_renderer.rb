@@ -40,7 +40,7 @@ module Crummy
           crumb_to_html crumb, options[:links]
         end * options[:separator]
         crumb_string
-      when :html_list
+      when :html_list, :bootstrap
         # In html_list format there are no separator, but may be
         options[:separator] = "" if options[:separator] == nil
         # Lets set default values for special options of html_list format
@@ -48,9 +48,17 @@ module Crummy
         options[:li_class] = "" if options[:li_class] == nil
         options[:ul_class] = "" if options[:ul_class] == nil
         options[:ul_id] = "" if options[:ul_id] == nil
+
         crumb_string = crumbs.collect do |crumb|
-          crumb_to_html_list crumb, options[:links], options[:li_class], options[:active_li_class]
-        end * options[:separator]
+          if options[:format] == :html_list
+            crumb_to_html_list crumb, options[:links], options[:li_class], options[:active_li_class]
+          else
+            crumb_to_bootstrap crumb, options[:links], options[:li_class], options[:active_li_class], options[:separator]
+          end
+        end
+
+        crumb_string *= options[:separator] if options[:format] == :html_list
+
         crumb_string = "<ul class=\"#{options[:ul_class]}\" id=\"#{options[:ul_id]}\">" + crumb_string + "</ul>"
         crumb_string
       when :xml
@@ -69,6 +77,11 @@ module Crummy
       url && links ? link_to(name, url) : name
     end
     
+    def crumb_to_bootstrap(crumb, links, li_class, active_li_class, separator)
+      name, url = crumb
+      url && links ? "<li class=\"#{li_class}\"><a href=\"#{url}\">#{name}</a><span class=\"divider\">#{separator}</span></li>" : "<li class=\"#{active_li_class}\">#{name}</li>"
+    end
+
     def crumb_to_html_list(crumb, links, li_class, active_li_class)
       name, url = crumb
       url && links ? "<li class=\"#{li_class}\"><a href=\"#{url}\">#{name}</a></li>" : "<li class=\"#{active_li_class}\"><span>#{name}</span></li>"
