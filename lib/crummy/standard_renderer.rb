@@ -55,9 +55,7 @@ module Crummy
           else
             crumb_to_bootstrap crumb, options[:links], options[:li_class], options[:active_li_class], options[:separator]
           end
-        end
-
-        crumb_string *= options[:separator] if options[:format] == :html_list
+        end.join
 
         crumb_string = "<ul class=\"#{options[:ul_class]}\" id=\"#{options[:ul_id]}\">" + crumb_string + "</ul>"
         crumb_string
