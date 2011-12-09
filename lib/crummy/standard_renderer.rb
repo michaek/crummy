@@ -27,13 +27,35 @@ module Crummy
     #   render_crumbs(" . ")  #=> <a href="/">Home</a> . <a href="/businesses">Businesses</a>
     #
     def render_crumbs(crumbs, options = {})
-      options[:format] = :html if options[:format] == nil
       return '' if options[:skip_if_blank] && crumbs.count < 1
-      if options[:separator] == nil
+
+      default_options = {
+        :format => :html,
+        :active_li_class => "",
+        :li_class => "",
+        :ul_class => "",
+        :ul_id => "",
+        :links => true
+      }
+      
+      # Add some sensible defaults for Bootstrap
+      if options[:format] == :bootstrap
+        default_options.merge!({
+          :separator => "/",
+          :active_li_class => "active",
+          :ul_class => "breadcrumb"
+        })
+      end
+      
+      options = default_options.merge(options)
+
+      # Hmm. More defaults.
+      if options[:separator].nil?
         options[:separator] = " &raquo; " if options[:format] == :html 
         options[:separator] = "crumb" if options[:format] == :xml 
+        options[:separator] = "" if options[:format] == :html_list 
       end
-      options[:links] = true if options[:links] == nil
+
       case options[:format]
       when :html
         crumb_string = crumbs.collect do |crumb|
@@ -41,13 +63,6 @@ module Crummy
         end * options[:separator]
         crumb_string
       when :html_list, :bootstrap
-        # In html_list format there are no separator, but may be
-        options[:separator] = "" if options[:separator] == nil
-        # Lets set default values for special options of html_list format
-        options[:active_li_class] = "" if options[:active_li_class] == nil
-        options[:li_class] = "" if options[:li_class] == nil
-        options[:ul_class] = "" if options[:ul_class] == nil
-        options[:ul_id] = "" if options[:ul_id] == nil
 
         crumb_string = crumbs.collect do |crumb|
           if options[:format] == :html_list
